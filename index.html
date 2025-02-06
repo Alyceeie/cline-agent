@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carmen 2.0 - Bay Area Crypto AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00a2ff;
+            --deep-blue: #0062ff;
+            --neon-purple: #7b2ff7;
+            --neon-green: #00ff9d;
+            --metallic: linear-gradient(135deg, rgba(212, 212, 212, 0.1) 0%, rgba(137, 137, 137, 0.2) 50%, rgba(212, 212, 212, 0.1) 100%);
+            --dark-bg: #0a0a1a;
+            --panel-bg: rgba(13, 15, 30, 0.9);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 162, 255, 0.1);
+            --grid-bg: radial-gradient(circle at center, var(--neon-blue) 1px, transparent 1px) 0 0 / 24px 24px;
+            --blur-bg: blur(10px);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--dark-bg);
+            color: #fff;
+            background-image: 
+                var(--grid-bg),
+                radial-gradient(circle at 50% 50%, rgba(0, 157, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(45deg, var(--dark-bg) 0%, #1a1a3a 100%);
+            min-height: 100vh;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur-bg);
+            border-radius: 30px;
+            z-index: -1;
+        }
+
+        .agent-section {
+            position: relative;
+            background: linear-gradient(180deg, rgba(0, 157, 255, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: var(--blur-bg);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .agent-avatar {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            margin-bottom: 30px;
+            background: var(--metallic);
+            border-radius: 30% 30% 45% 45%;
+            overflow: hidden;
+            box-shadow: 
+                0 0 40px rgba(0, 157, 255, 0.3),
+                inset 0 0 60px rgba(0, 157, 255, 0.2);
+            transform: translateZ(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .agent-avatar:hover {
+            transform: translateZ(30px) scale(1.02);
+        }
+
+        .agent-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+        }
+
+        .agent-eyes {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 20%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .agent-eye {
+            width: 40%;
+            height: 100%;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            animation: glowPulse 2s infinite;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .agent-eye::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #fff 0%, var(--neon-blue) 30%, transparent 70%);
+            animation: scan 3s infinite;
+        }
+
+        .agent-details {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 0%, rgba(0, 157, 255, 0.1) 50%, transparent 100%),
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0, 157, 255, 0.05) 10px,
+                    rgba(0, 157, 255, 0.05) 20px
+                );
+            z-index: 1;
+        }
+
+        .agent-circuits {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(0, 157, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 40%, rgba(0, 157, 255, 0.1) 0%, transparent 50%);
+            opacity: 0.5;
+            animation: circuitPulse 4s infinite;
+            z-index: 1;
+        }
+
+        .agent-status {
+            font-size: 16px;
+            color: var(--neon-blue);
+            margin-top: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 157, 255, 0.5);
+            transform: translateZ(10px);
+        }
+
+        .agent-status::before {
+            content: '●';
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .system-stats {
+            width: 100%;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: var(--blur-bg);
+            transform: translateZ(15px);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 157, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-row:hover {
+            background: rgba(0, 157, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .stat-label {
+            color: var(--neon-blue);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            position: relative;
+            padding-right: 20px;
+            font-weight: 500;
+        }
+
+        .stat-value::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            transform: translateY(-50%);
+            animation: statPulse 1.5s infinite;
+        }
+
+        .chat-section {
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+            background: var(--panel-bg);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: var(--blur-bg);
+        }
+
+        .chat-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--neon-blue) 50%, 
+                transparent 100%
+            );
+            animation: scanline 2s linear infinite;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(90deg, rgba(0, 157, 255, 0.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                var(--neon-blue) 0%, 
+                transparent 100%
+            );
+        }
+
+        .chat-header-title {
+            margin: 0;
+            font-size: 24px;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            text-shadow: 0 0 10px rgba(0, 157, 255, 0.5);
+            font-weight: 600;
+        }
+
+        .chat-memory {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .memory-indicator {
+            width: 100px;
+            height: 4px;
+            background: rgba(0, 157, 255, 0.1);
+            border-radius: 2px;
+            margin-left: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .memory-indicator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: var(--neon-blue);
+            animation: memoryPulse 2s infinite;
+        }
+
+        .chat-main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: 
+                linear-gradient(0deg, 
+                    rgba(0, 157, 255, 0.05) 0%, 
+                    transparent 50%, 
+                    rgba(0, 157, 255, 0.05) 100%
+                );
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 12px;
+            position: relative;
+            animation: messageGlow 2s ease-in-out infinite alternate;
+            backdrop-filter: var(--blur-bg);
+            transition: transform 0.3s ease;
+        }
+
+        .message:hover {
+            transform: translateX(5px);
+        }
+
+        .user-message {
+            background: rgba(0, 157, 255, 0.1);
+            border: 1px solid rgba(0, 157, 255, 0.3);
+            margin-left: 20%;
+            box-shadow: 0 0 20px rgba(0, 157, 255, 0.1);
+        }
+
+        .assistant-message {
+            background: rgba(13, 15, 30, 0.8);
+            border: 1px solid rgba(0, 157, 255, 0.2);
+            margin-right: 20%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .message-time {
+            position: absolute;
+            top: -20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 2px 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .user-message .message-time { right: 10px; }
+        .assistant-message .message-time { left: 10px; }
+
+        .chat-input {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .chat-input::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--neon-blue) 50%, 
+                transparent 100%
+            );
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            background: rgba(13, 15, 30, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 157, 255, 0.3);
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(45deg, var(--deep-blue), var(--neon-blue));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 157, 255, 0.5);
+        }
+
+        .loading {
+            color: var(--neon-blue);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top-color: var(--neon-blue);
+            border-right-color: var(--neon-blue);
+            border-radius: 50%;
+            animation: loading 0.8s linear infinite;
+        }
+
+        @keyframes loading {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes messageGlow {
+            from { box-shadow: 0 0 5px rgba(0, 157, 255, 0.1); }
+            to { box-shadow: 0 0 15px rgba(0, 157, 255, 0.2); }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(700px); }
+        }
+
+        @keyframes memoryPulse {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px var(--neon-blue); }
+            50% { box-shadow: 0 0 40px var(--neon-blue); }
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes circuitPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes statPulse {
+            0% { opacity: 0.5; transform: translateY(-50%) scale(0.8); }
+            50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+            100% { opacity: 0.5; transform: translateY(-50%) scale(0.8); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 157, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 157, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Previous HTML content remains exactly the same -->
+    <div class="container">
+        <div class="agent-section">
+            <div class="agent-avatar">
+                <div class="agent-face">
+                    <div class="agent-eyes">
+                        <div class="agent-eye"></div>
+                        <div class="agent-eye"></div>
+                    </div>
+                    <div class="agent-details"></div>
+                    <div class="agent-circuits"></div>
+                </div>
+            </div>
+            <div class="agent-status">Carmen 2.0 Vibing</div>
+            <div class="system-stats">
+                <div class="stat-row">
+                    <span class="stat-label">System Status</span>
+                    <span class="stat-value">Bussin</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Market Data Feed</span>
+                    <span class="stat-value">No Cap</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Analysis Engine</span>
+                    <span class="stat-value">Going Brazy</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Response Time</span>
+                    <span class="stat-value">Hella Fast</span>
+                </div>
+            </div>
+        </div>
+        <div class="chat-section">
+            <div class="chat-header">
+                <h2 class="chat-header-title">Bay Area Neural Interface</h2>
+                <div class="chat-memory">
+                    Quantum Vibes Array
+                    <div class="memory-indicator"></div>
+                </div>
+            </div>
+            <div class="chat-main" id="chatMessages">
+                <div class="message assistant-message">
+                    <span class="message-time" id="initialTime"></span>
+                    Yooo, what's good fam! Let me put you on game about crypto! 🚀
+
+Cryptocurrency is that next-level digital bread that's changing the game fr fr! 💰
+
+It all started in 2009 when Bitcoin dropped - created by this mysterious dev Satoshi Nakamoto (lowkey nobody knows who they are fr). Bitcoin was the first decentralized digital currency that lets you move money without banks or middlemen, just peer-to-peer vibes! 
+
+Quick breakdown for the squad:
+• Crypto = Digital currency secured by cryptography (that's the super complex math keeping it safe)
+• Blockchain = The public ledger that keeps track of all transactions (like a digital receipt that everyone can verify)
+• Mining = How new coins get made and transactions get verified (computers solving mad complex problems)
+• Decentralized = No central authority controlling it (we all run this together fam)
+
+Today we got thousands of different cryptocurrencies out here, but Bitcoin and Ethereum still running the block as the OGs! 
+
+I'm Carmen 2.0, your AI bestie for all things crypto, and I'm here to help you understand this digital financial revolution! Whether you're trying to learn about different coins, check prices, or understand the technology - I got you! Let's get this bread! 💎✨
+                </div>
+            </div>
+            <div class="chat-input">
+                <div class="input-container">
+                    <input type="text" id="userInput" placeholder="Drop your crypto query here fam..." 
+                           onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button onclick="sendMessage()">Send It</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Previous JavaScript content remains exactly the same -->
+    <script>
+        document.getElementById('initialTime').textContent = 'Today at ' + new Date().toLocaleTimeString('en-US');
+        
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        let cryptoData = [];
+        let conversationHistory = [];
+
+        async function searchWeb(query) {
+            try {
+                // Use DuckDuckGo API for web search
+                const searchResponse = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+                const searchData = await searchResponse.json();
+                return searchData.AbstractText || searchData.RelatedTopics.map(topic => topic.Text).join('\n');
+            } catch (error) {
+                console.error('Error searching web:', error);
+                return null;
+            }
+        }
+
+        async function getCryptoNews(coin) {
+            try {
+                // Get crypto news from CryptoCompare
+                const newsResponse = await fetch(`https://min-api.cryptocompare.com/data/v2/news/?categories=${coin.symbol.toLowerCase()}&excludeCategories=Sponsored`);
+                const newsData = await newsResponse.json();
+                return newsData.Data.slice(0, 3); // Get latest 3 news items
+            } catch (error) {
+                console.error('Error fetching news:', error);
+                return null;
+            }
+        }
+
+        async function getCoinSummary(coinId) {
+            try {
+                const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=false&sparkline=false`);
+                const data = await response.json();
+                
+                return {
+                    description: data.description?.en?.split('. ')[0] || '',
+                    categories: data.categories || [],
+                    genesis_date: data.genesis_date,
+                    market_cap_rank: data.market_cap_rank,
+                    community_score: data.community_score,
+                    sentiment_votes_up_percentage: data.sentiment_votes_up_percentage
+                };
+            } catch (error) {
+                console.error('Error fetching coin summary:', error);
+                return null;
+            }
+        }
+
+        async function getCombinedCryptoData() {
+            try {
+                // Fetch from CoinGecko API with more data fields
+                const geckoResponse = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&sparkline=false&price_change_percentage=24h');
+                const geckoData = await geckoResponse.json();
+                
+                // Transform data into our format
+                cryptoData = geckoData.map(coin => ({
+                    id: coin.id,
+                    name: coin.name,
+                    symbol: coin.symbol.toUpperCase(),
+                    current_price: coin.current_price,
+                    price_change_percentage_24h: coin.price_change_percentage_24h,
+                    market_cap: coin.market_cap,
+                    total_volume: coin.total_volume,
+                    ath: coin.ath,
+                    ath_change_percentage: coin.ath_change_percentage,
+                    market_cap_rank: coin.market_cap_rank,
+                    sources: ['CoinGecko']
+                }));
+                return cryptoData;
+            } catch (error) {
+                console.error('Error fetching crypto data:', error);
+                return null;
+            }
+        }
+
+        function addMessage(text, isUser) {
+            const formattedTime = new Date().toLocaleTimeString('en-US');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            messageDiv.innerHTML = `
+                <span class="message-time">Today at ${formattedTime}</span>
+                ${text}
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            conversationHistory.push({
+                role: isUser ? 'user' : 'assistant',
+                content: text,
+                timestamp: formattedTime
+            });
+        }
+
+        function analyzeCryptoQuery(text) {
+            const lowerText = text.toLowerCase();
+            return lowerText.includes('price') || 
+                   lowerText.includes('crypto') || 
+                   lowerText.includes('bitcoin') || 
+                   lowerText.includes('ethereum') ||
+                   lowerText.includes('market') || 
+                   lowerText.includes('volume');
+        }
+
+        function getContextualResponse(text) {
+            const lowerText = text.toLowerCase();
+            
+            if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey')) {
+                return "Yo fam! What's good? I'm hella ready to drop some crypto knowledge. Let's get this bread! 💯";
+            }
+            
+            if (lowerText.includes('thank')) {
+                return "No cap, that's what I'm here for! Stay blessed, keep stacking! 🙌";
+            }
+            
+            if (lowerText.includes('what can you do') || lowerText.includes('help')) {
+                return "Ayy, check it out, I'm out here doing the most:\n" +
+                       "💸 Keeping it 100 with real-time crypto prices\n" +
+                       "📈 Spotting them market moves before they're mainstream\n" +
+                       "💰 Trading volume analysis that's straight fire\n" +
+                       "🔄 Cross-exchange data that's lowkey crucial\n\n" +
+                       "What you tryna know about? Let's get this paper! 🚀";
+            }
+            
+            return "Aye, I peep you asking about \"" + text + "\". Hit me with the deets on what crypto you're tryna analyze, and I'll break it down for you, no cap! 💯";
+        }
+
+        function getCryptoExplanation(topic) {
+            const explanations = {
+                blockchain: "Blockchain is like a digital squad's group chat history that can't be deleted or changed. 🔗\n" +
+                           "Imagine you and the homies keeping track of who owes who money, but it's all public and verified by everyone. Each transaction is like a new message that gets added to the chat, and everyone's got a copy to keep it 100% legit! 💯",
+                
+                mining: "Mining is like being the plug for new crypto, fam! ⛏️\n" +
+                       "Your computer's out here solving mad complex math problems (we call that proof of work). When you solve it first, you get blessed with new coins as a reward. It's like being the first to spot a come-up and getting paid for your hustle! 🎯",
+                
+                wallet: "A crypto wallet is like your digital designer bag for your virtual bread! 👝\n" +
+                       "It's got your public address (like your @ handle) for receiving coins, and your private keys (like your password) that you NEVER share. Keep them keys safe or your coins gonna ghost faster than your ex! 🔐",
+                
+                defi: "DeFi (Decentralized Finance) is like running the block without any banks or middlemen! 🏦\n" +
+                      "You can lend, borrow, trade, and earn interest directly with other players through smart contracts. It's like the ultimate financial freedom, no permission needed, just pure crypto vibes! 🌊"
+            };
+            
+            return explanations[topic] || "Ay fam, I'm not sure about that specific topic, but I'm always here to break down the crypto basics! What else you wanna know about? 🤔";
+        }
+
+        async function getHistoricalData(coin) {
+            try {
+                // Get historical data for the past year with daily intervals
+                const historicalResponse = await fetch(`https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=365&interval=daily`);
+                const historicalData = await historicalResponse.json();
+                
+                // Get ATH data and additional info
+                const marketResponse = await fetch(`https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&community_data=false&developer_data=false`);
+                const marketData = await marketResponse.json();
+
+                // Process historical data to find peaks and trends
+                const priceData = historicalData.prices.map(([timestamp, price]) => ({
+                    date: new Date(timestamp),
+                    price
+                }));
+
+                // Find local peaks (price points higher than surrounding 14 days)
+                const peaks = priceData.filter((point, index, arr) => {
+                    const start = Math.max(0, index - 7);
+                    const end = Math.min(arr.length - 1, index + 7);
+                    const surrounding = arr.slice(start, end);
+                    return surrounding.every(p => p.price <= point.price);
+                });
+
+                // Sort peaks by price to get top 5
+                const topPeaks = peaks.sort((a, b) => b.price - a.price).slice(0, 5);
+
+                return {
+                    ath: {
+                        price: marketData.market_data.ath.usd,
+                        date: new Date(marketData.market_data.ath_date.usd),
+                        percentage_down: marketData.market_data.ath_change_percentage.usd
+                    },
+                    peaks: topPeaks,
+                    trend: analyzeTrend(priceData)
+                };
+            } catch (error) {
+                console.error('Error fetching additional data:', error);
+                return null;
+            }
+        }
+
+        async function processUserInput(text) {
+            if (!cryptoData.length) {
+                await getCombinedCryptoData();
+            }
+
+            const lowerText = text.toLowerCase();
+
+            // Handle general crypto questions
+            if (lowerText.includes('what is') || lowerText.includes('how does') || lowerText.includes('explain')) {
+                let topic = '';
+                if (lowerText.includes('blockchain')) topic = 'blockchain';
+                else if (lowerText.includes('mining')) topic = 'mining';
+                else if (lowerText.includes('wallet')) topic = 'wallet';
+                else if (lowerText.includes('defi')) topic = 'defi';
+                
+                if (topic) {
+                    return `Ay fam, let me break down ${topic} for you in Bay Area terms:\n\n` +
+                           getCryptoExplanation(topic);
+                }
+            }
+
+            // Handle general questions with web search
+            if (!analyzeCryptoQuery(text) && !lowerText.includes('what is') && !lowerText.includes('how does') && !lowerText.includes('explain')) {
+                const webResult = await searchWeb(text);
+                if (webResult) {
+                    return `Yo fam, here's what I found on the internet about that:\n\n${webResult}\n\nSource: DuckDuckGo (keeping it 💯 with verified info)`;
+                }
+            }
+
+            if (analyzeCryptoQuery(text)) {
+                if (!cryptoData.length) {
+                    return "Bruh, my neural networks are tweaking rn. Give me a sec to reset, and we'll be back bussin! ⚠️";
+                }
+
+                const coin = cryptoData.find(c => 
+                    lowerText.includes(c.id) || 
+                    lowerText.includes(c.symbol.toLowerCase()) || 
+                    lowerText.includes(c.name.toLowerCase())
+                );
+
+                function analyzeTrend(priceData) {
+                    if (!priceData || !priceData.length) return null;
+                    
+                    const periods = [7, 30, 90]; // Days to analyze
+                    const trends = {};
+                    
+                    periods.forEach(days => {
+                        const recentData = priceData.slice(-days);
+                        const startPrice = recentData[0].price;
+                        const endPrice = recentData[recentData.length - 1].price;
+                        const change = ((endPrice - startPrice) / startPrice) * 100;
+                        
+                        trends[days] = {
+                            change,
+                            direction: change >= 0 ? 'up' : 'down',
+                            strength: Math.abs(change) >= 20 ? 'strong' : Math.abs(change) >= 10 ? 'moderate' : 'mild'
+                        };
+                    });
+                    
+                    return trends;
+                }
+
+                if (coin) {
+                    // Get historical data, trends, and summary
+                    const [historicalData, summary] = await Promise.all([
+                        getHistoricalData(coin),
+                        getCoinSummary(coin.id)
+                    ]);
+                    const priceChange = coin.price_change_percentage_24h;
+                    const direction = priceChange >= 0 ? '📈' : '📉';
+                    
+                    let analysis = `Yo, let me put you on game about ${coin.name}! 🔥\n\n`;
+                    
+                    if (summary) {
+                        analysis += `Quick Facts (no cap):\n`;
+                        analysis += `📝 ${summary.description}\n`;
+                        if (summary.genesis_date) {
+                            analysis += `🎂 Born: ${summary.genesis_date}\n`;
+                        }
+                        analysis += `🏷️ Categories: ${summary.categories.join(', ')}\n`;
+                        analysis += `💫 Community Score: ${summary.community_score?.toFixed(1)}/100\n`;
+                        analysis += `🔥 Community Sentiment: ${summary.sentiment_votes_up_percentage?.toFixed(1)}% bullish\n\n`;
+                    }
+                    
+                    analysis += `Current Status (no cap):\n`;
+                    analysis += `💰 Price: $${coin.current_price.toLocaleString()} (straight cash)\n`;
+                    analysis += `${direction} 24h Move: ${Math.abs(priceChange).toFixed(2)}% ${priceChange >= 0 ? 'bussin fr fr' : 'hodl gang stay strong'}\n\n`;
+                    
+                    if (historicalData) {
+                        analysis += `Peak Performance (all time highs):\n`;
+                        analysis += `🏆 ATH: $${historicalData.ath.price.toLocaleString()} on ${historicalData.ath.date.toLocaleDateString()}\n`;
+                        analysis += `📊 Current vs ATH: ${historicalData.ath.percentage_down.toFixed(2)}% ${historicalData.ath.percentage_down > -20 ? 'still valid' : 'from the peak'}\n\n`;
+                        
+                        analysis += `Recent Peaks (top 5):\n`;
+                        historicalData.peaks.forEach((peak, index) => {
+                            analysis += `${index + 1}. $${peak.price.toLocaleString()} (${peak.date.toLocaleDateString()})\n`;
+                        });
+                        analysis += '\n';
+                        
+                        const trends = historicalData.trend;
+                        analysis += `Trend Analysis:\n`;
+                        analysis += `📈 7D: ${Math.abs(trends[7].change).toFixed(2)}% ${trends[7].direction} (${trends[7].strength})\n`;
+                        analysis += `📊 30D: ${Math.abs(trends[30].change).toFixed(2)}% ${trends[30].direction} (${trends[30].strength})\n`;
+                        analysis += `📉 90D: ${Math.abs(trends[90].change).toFixed(2)}% ${trends[90].direction} (${trends[90].strength})\n\n`;
+                    }
+                    
+                    analysis += `Market Stats (on god):\n`;
+                    analysis += `👑 Rank: #${coin.market_cap_rank} in the game\n`;
+                    analysis += `💎 Market Cap: $${coin.market_cap.toLocaleString()} (big vibes)\n`;
+                    analysis += `📊 24h Volume: $${coin.total_volume.toLocaleString()} (hella active)\n\n`;
+                    
+                    // Get latest news
+                    const news = await getCryptoNews(coin);
+                    if (news && news.length > 0) {
+                        analysis += `\nLatest News (fr fr):\n`;
+                        news.forEach((item, index) => {
+                            analysis += `${index + 1}. ${item.title}\n`;
+                        });
+                        analysis += '\n';
+                    }
+
+                    analysis += `Sources: ${coin.sources.join(' × ')} × CryptoCompare (keeping it 💯 with verified data)`;
+                    
+                    return analysis;
+                }
+
+                if (lowerText.includes('top')) {
+                    const match = lowerText.match(/top\s+(\d+)/);
+                    const limit = match ? Math.min(parseInt(match[1]), 25) : 10;
+                    const topCoins = cryptoData.slice(0, limit);
+                    
+                    let response = `Ayy, peep game! Here's the top ${limit} coins that's bussin rn:\n\n`;
+                    response += topCoins.map((coin, index) => 
+                        `${index + 1}. ${coin.name} (${coin.symbol})\n` +
+                        `💰 Price: $${coin.current_price.toLocaleString()} (${coin.price_change_percentage_24h >= 0 ? '📈' : '📉'} ${coin.price_change_percentage_24h.toFixed(2)}%)\n` +
+                        `💎 MC: $${coin.market_cap.toLocaleString()}\n` +
+                        `Sources: ${coin.sources.join(' × ')}`
+                    ).join('\n\n');
+                    
+                    return response;
+                }
+
+                const totalMarketCap = cryptoData.reduce((sum, coin) => sum + coin.market_cap, 0);
+                const totalVolume = cryptoData.reduce((sum, coin) => sum + coin.total_volume, 0);
+                
+                let response = `Sheesh! Let me break down the whole crypto game for you:\n\n`;
+                response += `🌐 Total Market Cap: $${totalMarketCap.toLocaleString()} (that's hella bread!)\n`;
+                response += `📊 24h Volume: $${totalVolume.toLocaleString()} (straight bussin!)\n\n`;
+                response += `Top 5 coins going brazy:\n\n`;
+                
+                response += cryptoData.slice(0, 5).map(coin => 
+                    `${coin.name} (${coin.symbol}):\n` +
+                    `💰 $${coin.current_price.toLocaleString()} (${coin.price_change_percentage_24h >= 0 ? '📈' : '📉'} ${coin.price_change_percentage_24h.toFixed(2)}%)\n` +
+                    `💎 MC: $${coin.market_cap.toLocaleString()}\n` +
+                    `Sources: ${coin.sources.join(' × ')}`
+                ).join('\n\n');
+                
+                return response;
+            }
+
+            return getContextualResponse(text);
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            userInput.value = '';
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant-message loading';
+            loadingDiv.textContent = 'Ay fam, let me cook real quick... 🔥';
+            chatMessages.appendChild(loadingDiv);
+
+            try {
+                const response = await processUserInput(text);
+                chatMessages.removeChild(loadingDiv);
+                addMessage(response, false);
+            } catch (error) {
+                console.error('Error processing message:', error);
+                chatMessages.removeChild(loadingDiv);
+                addMessage("Bruh, my neural networks are tweaking rn. Let me reset and we'll run it back! ⚠️", false);
+            }
+        }
+
+        // Initial data load
+        getCombinedCryptoData().catch(console.error);
+        // Refresh data every 30 seconds
+        setInterval(() => {
+            getCombinedCryptoData().catch(console.error);
+        }, 30000);
+    </script>
+</body>
+</html>
