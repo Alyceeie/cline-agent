@@ -1,0 +1,67 @@
+name: AI Agent Workflow
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [opened, edited, labeled]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  ai-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: AI Agent Response
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              console.log('Event name:', context.eventName);
+              console.log('Event payload:', JSON.stringify(context.payload, null, 2));
+              
+              if (context.eventName === 'issues' && context.payload.action === 'opened') {
+                const issueTitle = context.payload.issue.title;
+                console.log('Processing new issue:', issueTitle);
+                
+                const body = `Hey fam! Carmen 2.0 here! 🚀
+
+                Thanks for opening this issue about: "${issueTitle}"
+                
+                I'm analyzing your request and will help you out! Stay tuned for updates... 💫`;
+                
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: context.payload.issue.number,
+                  body: body
+                });
+                
+                console.log('Comment created successfully');
+              }
+              
+              if (context.eventName === 'pull_request' && context.payload.action === 'opened') {
+                console.log('Processing new pull request:', context.payload.pull_request.title);
+                
+                const body = `Yo! Thanks for the PR! I'll check out your changes and drop some feedback real quick! 🔍`;
+                
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: body
+                });
+                
+                console.log('PR comment created successfully');
+              }
+            } catch (error) {
+              console.error('Error in AI Agent workflow:', error);
+              throw error;
+            }
